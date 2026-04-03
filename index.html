@@ -1,662 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lunch Order</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg-page: #f7f7f7;
-      --accent: #b23b2b;
-      --text: #111;
-      --text-muted: #6b6b6b;
-      --text-label: #9a9a9a;
-      --card-border: #e0e0e0;
-      --white: #fff;
-      --black: #0a0a0a;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+body{background:#e8e6e1;display:flex;justify-content:center;align-items:flex-start;padding:24px}
+.card{background:#fff;width:420px;border-radius:20px;padding:28px 24px 20px;box-shadow:0 2px 16px rgba(0,0,0,0.10)}
+.logo img{height:48px;object-fit:contain}
+.title{font-size:44px;font-weight:900;color:#000;letter-spacing:0.5px;line-height:1.05;margin-top:10px}
+.date{font-size:14px;font-weight:700;color:#ee1d3f;letter-spacing:0.5px;margin-top:2px;margin-bottom:18px}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 20px;border:1.5px solid #dadce0;border-radius:8px;background:#fff;cursor:pointer;margin-bottom:20px;transition:background 0.15s}
+.google-btn:hover{background:#f8f8f8}
+.google-icon{width:20px;height:20px;flex-shrink:0}
+.google-btn span{font-size:15px;color:#3c4043;font-weight:500}
+.meal-cards{display:flex;gap:12px;margin-bottom:14px}
+.meal-card{flex:1;background:#111;border-radius:16px;padding:18px 16px 22px;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;transition:transform 0.12s;min-height:110px;justify-content:center}
+.meal-card:hover{background:#222;transform:scale(1.02)}
+.meal-card.selected{outline:3px solid #ee1d3f}
+.meal-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:28px;height:28px;background:#ee1d3f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;border:2.5px solid #fff;z-index:2}
+.meal-name{color:#fff;font-size:30px;font-weight:800;margin-top:8px}
+.cancel-btn{width:100%;background:#ee1d3f;border:none;border-radius:14px;padding:17px;color:#fff;font-size:18px;font-weight:800;letter-spacing:2.5px;cursor:pointer;margin-bottom:14px;transition:background 0.15s}
+.cancel-btn:hover{background:#cc1535}
+.cancel-btn.confirm{background:#1a8a3a}
+.footer-note{text-align:center;font-size:11.5px;color:#999}
+.footer-note strong{color:#777;font-weight:600}
+</style>
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-      background: var(--bg-page);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .page {
-      min-height: 100vh;
-      padding: 2rem 1.25rem 3rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 520px;
-      background: var(--white);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 2rem 2rem 2.25rem;
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
-    }
-
-    .card-header,
-    .session-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .user-line {
-      font-size: 0.95rem;
-    }
-
-    .user-line strong {
-      font-weight: 600;
-    }
-
-    .sign-out {
-      background: none;
-      border: none;
-      padding: 0;
-      font: inherit;
-      color: var(--accent);
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .sign-out:hover {
-      opacity: 0.85;
-    }
-
-    h1 {
-      margin: 0 0 0.35rem;
-      font-size: clamp(1.75rem, 4vw, 2.125rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      margin: 0 0 2rem;
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .section-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-label);
-      margin-bottom: 0.85rem;
-      font-weight: 600;
-    }
-
-    .meals {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
-      margin-bottom: 1rem;
-    }
-
-    @media (max-width: 420px) {
-      .meals {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .meal {
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 1.25rem 1rem;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-      background: var(--white);
-    }
-
-    .meal:hover:not(:disabled) {
-      border-color: #c8c8c8;
-    }
-
-    .meal:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .meal.selected {
-      border-color: var(--black);
-      box-shadow: 0 0 0 1px var(--black);
-    }
-
-    .meal-num {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: var(--white);
-      font-weight: 700;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 0.65rem;
-    }
-
-    .meal-name {
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    .btn-primary {
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      padding: 0.95rem 1.25rem;
-      font-family: inherit;
-      font-size: 1rem;
-      font-weight: 600;
-      background: var(--black);
-      color: var(--white);
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      opacity: 0.92;
-    }
-
-    .btn-primary:active:not(:disabled) {
-      transform: scale(0.99);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .status {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      min-height: 1.4em;
-    }
-
-    .status.error {
-      color: var(--accent);
-    }
-
-    .status.ok {
-      color: #2d6a4f;
-    }
-
-    .auth-top {
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 1.5rem;
-      margin-bottom: 1.75rem;
-    }
-
-    .auth-session {
-      margin: 0;
-    }
-
-    .session-row {
-      margin: 0;
-    }
-
-    #gsi-button {
-      display: flex;
-      justify-content: flex-start;
-    }
-
-    .auth-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.85rem;
-    }
-
-    .auth-divider {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: var(--text-label);
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin: 0.15rem 0;
-    }
-
-    .auth-divider::before,
-    .auth-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--card-border);
-    }
-
-    .btn-bypass {
-      width: 100%;
-      max-width: 280px;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 600;
-      background: var(--white);
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
-    }
-
-    .btn-bypass:hover {
-      border-color: #b8b8b8;
-      color: var(--text);
-    }
-
-    .order-region {
-      transition: opacity 0.2s ease;
-    }
-
-    .order-region.is-locked {
-      pointer-events: none;
-      opacity: 0.38;
-      user-select: none;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .footnote {
-      margin-top: 2rem;
-      max-width: 520px;
-      width: 100%;
-      font-size: 0.75rem;
-      color: var(--text-label);
-      line-height: 1.5;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <div class="page">
-    <section class="card" aria-labelledby="page-title">
-      <div class="auth-top">
-        <div id="auth-prompt" class="auth-prompt">
-          <div class="auth-actions">
-            <div id="gsi-button"></div>
-            <span class="auth-divider" aria-hidden="true">or</span>
-            <button type="button" class="btn-bypass" id="btn-bypass-login">
-              Continue without Google
-            </button>
-          </div>
-          <p class="status error hidden" id="auth-error" role="alert"></p>
-        </div>
-        <div id="auth-session" class="auth-session hidden">
-          <div class="session-row">
-            <p class="user-line">Ordering as <strong id="user-email"></strong></p>
-            <button type="button" class="sign-out" id="btn-sign-out">Sign out</button>
-          </div>
-        </div>
-      </div>
-
-      <h1 id="page-title">Lunch Order</h1>
-      <p class="subtitle">Order before 11:30 AM</p>
-
-      <div id="order-region" class="order-region is-locked" aria-disabled="true">
-        <div class="section-label">Select your meal</div>
-        <div class="meals" role="radiogroup" aria-label="Meal options">
-          <button type="button" class="meal" role="radio" aria-checked="false" tabindex="-1" data-meal="Rice &amp; Curry" data-index="1">
-            <div class="meal-num">1</div>
-            <div class="meal-name">Rice &amp; Curry</div>
-          </button>
-          <button type="button" class="meal" role="radio" aria-checked="false" tabindex="-1" data-meal="Grilled Chicken" data-index="2">
-            <div class="meal-num">2</div>
-            <div class="meal-name">Grilled Chicken</div>
-          </button>
-        </div>
-      </div>
-
-      <button type="button" class="btn-primary" id="btn-cancel" disabled>Cancel order</button>
-      <p class="status" id="order-status" aria-live="polite"></p>
-    </section>
-
-    <p class="footnote">
-      Configure <code>GOOGLE_CLIENT_ID</code> and <code>APPS_SCRIPT_WEB_APP_URL</code> in the script below. Deploy the Apps Script as a web app (Execute as you, Anyone can access).
-    </p>
+<div style="display:flex;justify-content:center;padding:20px;background:#e8e6e1;min-height:100%">
+<div class="card">
+  <div class="logo">
+    <img src="https://careers.recruiteecdn.com/image/upload/q_auto,f_auto,w_400,c_limit/production/images/BsZN/-fDVhjUjc-Xo.png" alt="NEXT Ventures" />
   </div>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script>
-    /**
-     * SETUP (required)
-     * ---------------
-     * 1) Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID
-     *    (Web application). Add Authorized JavaScript origins, e.g. http://localhost:8080
-     *    and your production URL.
-     *
-     * 2) Google Sheet + Apps Script (Extensions → Apps Script). Paste:
-     *
-     *    function doPost(e) {
-     *      try {
-     *        var body = e.postData && e.postData.contents ? e.postData.contents : "{}";
-     *        var data = JSON.parse(body);
-     *        var sh = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-     *        sh.appendRow([
-     *          new Date(),
-     *          data.email || "",
-     *          data.name || "",
-     *          data.meal || ""
-     *        ]);
-     *        return ContentService.createTextOutput(JSON.stringify({ ok: true }))
-     *          .setMimeType(ContentService.MimeType.JSON);
-     *      } catch (err) {
-     *        return ContentService.createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-     *          .setMimeType(ContentService.MimeType.JSON);
-     *      }
-     *    }
-     *
-     *    Deploy → New deployment → Type: Web app
-     *    Execute as: Me | Who has access: Anyone
-     *    Copy the Web app URL into APPS_SCRIPT_WEB_APP_URL below.
-     *
-     *    First row: Timestamp | Email | Name | Meal
-     *    (JSON may include intent: "order" | "cancel"; cancel rows use meal "(Cancelled)".)
-     */
+  <div class="title">LUNCH ORDER</div>
+  <div class="date">SATURDAY (4 APRIL 2026)</div>
 
-    const GOOGLE_CLIENT_ID = "YOUR_CLIENT_ID.apps.googleusercontent.com";
-    const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+  <button class="google-btn" onclick="handleGoogle()">
+    <svg class="google-icon" viewBox="0 0 48 48">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      <path fill="none" d="M0 0h48v48H0z"/>
+    </svg>
+    <span>Continue with Google</span>
+  </button>
 
-    /** Shown in the sheet when using “Continue without Google” (change or remove when going live). */
-    const BYPASS_EMAIL = "guest@preview.local";
-    const BYPASS_NAME = "Guest (no Google)";
+  <div class="meal-cards">
+    <div class="meal-card" id="card-chicken" onclick="selectMeal('chicken')">
+      <div class="meal-badge">1</div>
+      <div class="meal-name">Chicken</div>
+    </div>
+    <div class="meal-card" id="card-fish" onclick="selectMeal('fish')">
+      <div class="meal-badge">2</div>
+      <div class="meal-name">Fish</div>
+    </div>
+  </div>
 
-    const authPrompt = document.getElementById("auth-prompt");
-    const authSession = document.getElementById("auth-session");
-    const orderRegion = document.getElementById("order-region");
-    const gsiContainer = document.getElementById("gsi-button");
-    const authError = document.getElementById("auth-error");
-    const userEmailEl = document.getElementById("user-email");
-    const btnSignOut = document.getElementById("btn-sign-out");
-    const mealButtons = document.querySelectorAll(".meal");
-    const btnCancel = document.getElementById("btn-cancel");
-    const orderStatus = document.getElementById("order-status");
-    const btnBypassLogin = document.getElementById("btn-bypass-login");
+  <button class="cancel-btn" id="main-btn" onclick="handleCancel()">CANCEL</button>
 
-    let userEmail = "";
-    let userName = "";
-    let sessionFromBypass = false;
-    let orderingBusy = false;
+  <div class="footer-note">Last time to place an order is <strong>9AM (5 APRIL 2026)</strong></div>
+</div>
+</div>
 
-    function parseJwtPayload(jwt) {
-      try {
-        const part = jwt.split(".")[1];
-        const json = atob(part.replace(/-/g, "+").replace(/_/g, "/"));
-        return JSON.parse(
-          decodeURIComponent(
-            json
-              .split("")
-              .map(function (c) {
-                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-              })
-              .join("")
-          )
-        );
-      } catch (e) {
-        return null;
-      }
-    }
+<script>
+let isOrderCooldown = false;
+let orderResetTimer = null;
 
-    function showAuthError(msg) {
-      authError.textContent = msg;
-      authError.classList.remove("hidden");
-    }
+function handleGoogle() {
+  const btn = document.querySelector('.google-btn');
+  btn.innerHTML = '<span style="color:#3c4043;font-weight:500">✓ Signed in with Google</span>';
+  btn.style.background = '#f0faf0';
+  btn.style.borderColor = '#34A853';
+  btn.disabled = true;
+}
 
-    function clearAuthError() {
-      authError.textContent = "";
-      authError.classList.add("hidden");
-    }
+function placeOrderFeedback(mealType) {
+  if (isOrderCooldown) return;
+  isOrderCooldown = true;
+  const btn = document.getElementById('main-btn');
+  const label = mealType === 'chicken' ? 'CHICKEN' : 'FISH';
+  btn.textContent = '✓ ' + label + ' ORDER PLACED!';
+  btn.classList.add('confirm');
+  btn.style.background = '';
+  document.getElementById('card-chicken').classList.remove('selected');
+  document.getElementById('card-fish').classList.remove('selected');
+  if (orderResetTimer) clearTimeout(orderResetTimer);
+  orderResetTimer = setTimeout(() => {
+    isOrderCooldown = false;
+    orderResetTimer = null;
+    btn.textContent = 'CANCEL';
+    btn.classList.remove('confirm');
+  }, 2500);
+}
 
-    function updateChromeDisabled() {
-      var locked = orderRegion.classList.contains("is-locked");
-      var block = orderingBusy || locked || !userEmail;
-      mealButtons.forEach(function (b) {
-        b.disabled = orderingBusy || locked;
-      });
-      btnCancel.disabled = block;
-    }
+function selectMeal(type) {
+  if (isOrderCooldown) return;
+  placeOrderFeedback(type);
+}
 
-    function setOrderLocked(locked) {
-      if (locked) {
-        orderRegion.classList.add("is-locked");
-        orderRegion.setAttribute("aria-disabled", "true");
-        mealButtons.forEach(function (b) {
-          b.setAttribute("tabindex", "-1");
-        });
-      } else {
-        orderRegion.classList.remove("is-locked");
-        orderRegion.setAttribute("aria-disabled", "false");
-        mealButtons.forEach(function (b) {
-          b.setAttribute("tabindex", "0");
-        });
-      }
-      updateChromeDisabled();
-    }
-
-    function applyLoggedInUi() {
-      authPrompt.classList.add("hidden");
-      authSession.classList.remove("hidden");
-      setOrderLocked(false);
-      orderStatus.textContent = "";
-      orderStatus.className = "status";
-    }
-
-    function applyLoggedOutUi() {
-      authPrompt.classList.remove("hidden");
-      authSession.classList.add("hidden");
-      orderingBusy = false;
-      setOrderLocked(true);
-      mealButtons.forEach(function (b) {
-        b.classList.remove("selected");
-        b.setAttribute("aria-checked", "false");
-      });
-      orderStatus.textContent = "";
-      orderStatus.className = "status";
-    }
-
-    function onCredentialResponse(response) {
-      clearAuthError();
-      if (!response || !response.credential) {
-        showAuthError("Sign-in did not return a credential.");
-        return;
-      }
-      const payload = parseJwtPayload(response.credential);
-      if (!payload || !payload.email) {
-        showAuthError("Could not read email from Google sign-in.");
-        return;
-      }
-      sessionFromBypass = false;
-      userEmail = payload.email;
-      userName = payload.name || "";
-      userEmailEl.textContent = userEmail;
-      applyLoggedInUi();
-    }
-
-    function enterOrderFlowBypass() {
-      clearAuthError();
-      sessionFromBypass = true;
-      userEmail = BYPASS_EMAIL;
-      userName = BYPASS_NAME;
-      userEmailEl.textContent = userEmail;
-      applyLoggedInUi();
-    }
-
-    function initGoogleSignIn() {
-      var clientOk = GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID.indexOf("YOUR_CLIENT_ID") === -1;
-      if (!clientOk) {
-        gsiContainer.innerHTML =
-          '<p style="margin:0;font-size:0.85rem;color:var(--text-label);max-width:280px;">Google sign-in is disabled until you set <code>GOOGLE_CLIENT_ID</code>. You can still use “Continue without Google”.</p>';
-        return;
-      }
-      if (typeof google === "undefined" || !google.accounts || !google.accounts.id) {
-        gsiContainer.innerHTML =
-          '<p style="margin:0;font-size:0.85rem;color:var(--accent);max-width:280px;">Google script failed to load. Use “Continue without Google” or check your network.</p>';
-        return;
-      }
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: onCredentialResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-      google.accounts.id.renderButton(gsiContainer, {
-        theme: "outline",
-        size: "large",
-        text: "signin_with",
-        shape: "rectangular",
-        width: 280
-      });
-    }
-
-    if (document.readyState === "complete") {
-      initGoogleSignIn();
-    } else {
-      window.addEventListener("load", initGoogleSignIn);
-    }
-
-    btnBypassLogin.addEventListener("click", enterOrderFlowBypass);
-
-    function sheetUrlOk() {
-      return APPS_SCRIPT_WEB_APP_URL && APPS_SCRIPT_WEB_APP_URL.indexOf("YOUR_DEPLOYMENT_ID") === -1;
-    }
-
-    function postToSheet(payload) {
-      return fetch(APPS_SCRIPT_WEB_APP_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-    }
-
-    function placeOrder(mealName) {
-      if (!userEmail || orderRegion.classList.contains("is-locked") || orderingBusy) return;
-      if (!sheetUrlOk()) {
-        orderStatus.textContent = "Set APPS_SCRIPT_WEB_APP_URL to your deployed Apps Script web app URL.";
-        orderStatus.className = "status error";
-        return;
-      }
-
-      orderingBusy = true;
-      updateChromeDisabled();
-      orderStatus.textContent = "Sending…";
-      orderStatus.className = "status";
-
-      mealButtons.forEach(function (b) {
-        b.classList.remove("selected");
-        b.setAttribute("aria-checked", "false");
-        if (b.getAttribute("data-meal") === mealName) {
-          b.classList.add("selected");
-          b.setAttribute("aria-checked", "true");
-        }
-      });
-
-      postToSheet({
-        email: userEmail,
-        name: userName,
-        meal: mealName,
-        intent: "order",
-        submittedAt: new Date().toISOString()
-      })
-        .then(function () {
-          orderStatus.textContent = "Ordered: " + mealName;
-          orderStatus.className = "status ok";
-        })
-        .catch(function () {
-          orderStatus.textContent = "Network error. Try again.";
-          orderStatus.className = "status error";
-          mealButtons.forEach(function (b) {
-            b.classList.remove("selected");
-            b.setAttribute("aria-checked", "false");
-          });
-        })
-        .finally(function () {
-          orderingBusy = false;
-          updateChromeDisabled();
-        });
-    }
-
-    mealButtons.forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        if (!userEmail || orderRegion.classList.contains("is-locked") || orderingBusy) return;
-        placeOrder(btn.getAttribute("data-meal"));
-      });
-    });
-
-    btnCancel.addEventListener("click", function () {
-      if (!userEmail || orderRegion.classList.contains("is-locked") || orderingBusy) return;
-      if (!sheetUrlOk()) {
-        orderStatus.textContent = "Set APPS_SCRIPT_WEB_APP_URL to your deployed Apps Script web app URL.";
-        orderStatus.className = "status error";
-        return;
-      }
-
-      orderingBusy = true;
-      updateChromeDisabled();
-      orderStatus.textContent = "Cancelling…";
-      orderStatus.className = "status";
-
-      postToSheet({
-        email: userEmail,
-        name: userName,
-        meal: "(Cancelled)",
-        intent: "cancel",
-        submittedAt: new Date().toISOString()
-      })
-        .then(function () {
-          mealButtons.forEach(function (b) {
-            b.classList.remove("selected");
-            b.setAttribute("aria-checked", "false");
-          });
-          orderStatus.textContent = "Order cancelled.";
-          orderStatus.className = "status ok";
-        })
-        .catch(function () {
-          orderStatus.textContent = "Network error. Try again.";
-          orderStatus.className = "status error";
-        })
-        .finally(function () {
-          orderingBusy = false;
-          updateChromeDisabled();
-        });
-    });
-
-    btnSignOut.addEventListener("click", function () {
-      if (!sessionFromBypass && typeof google !== "undefined" && google.accounts && google.accounts.id) {
-        google.accounts.id.disableAutoSelect();
-      }
-      sessionFromBypass = false;
-      userEmail = "";
-      userName = "";
-      clearAuthError();
-      applyLoggedOutUi();
-    });
-  </script>
+function handleCancel() {
+  const btn = document.getElementById('main-btn');
+  if (orderResetTimer) {
+    clearTimeout(orderResetTimer);
+    orderResetTimer = null;
+  }
+  isOrderCooldown = false;
+  document.getElementById('card-chicken').classList.remove('selected');
+  document.getElementById('card-fish').classList.remove('selected');
+  btn.textContent = 'CANCEL';
+  btn.style.background = '';
+  btn.classList.remove('confirm');
+}
+</script>
 </body>
 </html>
