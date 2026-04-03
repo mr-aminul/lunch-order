@@ -23,8 +23,10 @@ body{background:#e8e6e1;display:flex;justify-content:center;align-items:flex-sta
 .cancel-btn.confirm{background:#1a8a3a}
 .footer-note{text-align:center;font-size:11.5px;color:#999}
 .footer-note strong{color:#777;font-weight:600}
+.meal-cards.locked .meal-card{opacity:0.45;pointer-events:none;cursor:default}
 </style>
-
+</head>
+<body>
 <div style="display:flex;justify-content:center;padding:20px;background:#e8e6e1;min-height:100%">
 <div class="card">
   <div class="logo">
@@ -45,7 +47,7 @@ body{background:#e8e6e1;display:flex;justify-content:center;align-items:flex-sta
     <span>Continue with Google</span>
   </button>
 
-  <div class="meal-cards">
+  <div class="meal-cards locked" id="meal-cards">
     <div class="meal-card" id="card-chicken" onclick="selectMeal('chicken')">
       <div class="meal-badge">1</div>
       <div class="meal-name">Chicken</div>
@@ -62,16 +64,56 @@ body{background:#e8e6e1;display:flex;justify-content:center;align-items:flex-sta
 </div>
 </div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
+const GOOGLE_CLIENT_ID = "204530048104-afvmujue0n10b61hkijmfmierbo15b1h.apps.googleusercontent.com";
+
 let isOrderCooldown = false;
 let orderResetTimer = null;
+let googleSignedIn = false;
+let tokenClient = null;
+
+function initGoogleSignIn() {
+  if (typeof google === "undefined" || !google.accounts || !google.accounts.oauth2) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: "openid email profile",
+    callback: function (tokenResponse) {
+      if (tokenResponse.error) {
+        console.error(tokenResponse);
+        return;
+      }
+      fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: "Bearer " + tokenResponse.access_token }
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          googleSignedIn = true;
+          var btn = document.querySelector(".google-btn");
+          var label = (data && data.email) ? data.email : "Google";
+          btn.innerHTML = "<span style=\"color:#3c4043;font-weight:500\">✓ Signed in as " + label + "</span>";
+          btn.style.background = "#f0faf0";
+          btn.style.borderColor = "#34A853";
+          btn.disabled = true;
+          var mc = document.getElementById("meal-cards");
+          if (mc) mc.classList.remove("locked");
+        })
+        .catch(function (e) { console.error(e); });
+    }
+  });
+}
+
+window.addEventListener("load", function () {
+  initGoogleSignIn();
+});
 
 function handleGoogle() {
-  const btn = document.querySelector('.google-btn');
-  btn.innerHTML = '<span style="color:#3c4043;font-weight:500">✓ Signed in with Google</span>';
-  btn.style.background = '#f0faf0';
-  btn.style.borderColor = '#34A853';
-  btn.disabled = true;
+  if (googleSignedIn) return;
+  if (!tokenClient) {
+    alert("Google sign-in is still loading. Wait a moment and try again.");
+    return;
+  }
+  tokenClient.requestAccessToken({ prompt: "consent" });
 }
 
 function placeOrderFeedback(mealType) {
@@ -94,6 +136,7 @@ function placeOrderFeedback(mealType) {
 }
 
 function selectMeal(type) {
+  if (!googleSignedIn) return;
   if (isOrderCooldown) return;
   placeOrderFeedback(type);
 }
